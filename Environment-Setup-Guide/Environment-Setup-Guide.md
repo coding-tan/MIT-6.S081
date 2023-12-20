@@ -1,3 +1,5 @@
+[TOC]
+
 ## 环境搭建指南
 
 本指南将帮助您搭建 MIT-6.S081 课程所需的开发环境。
@@ -10,7 +12,76 @@
 
 > 我使用的是基于Vmware虚拟机上的Ubuntu 20.04.5 LTS
 
-## 步骤
+## 安装编译工具链
+
+### 1. 安装编译工具
+
+首先安装用于编译、调试和运行 RISC-V 架构程序的工具：
+
+```bash
+sudo apt-get install git build-essential gdb-multiarch qemu-system-misc gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu
+```
+
+1. **Git**： Git 是一个分布式版本控制系统，用于跟踪文件的变化。它被广泛用于协作开发和版本控制。
+
+2. **build-essential**： 这是一个包含了用于编译软件的基本工具的软件包集合。包括 `gcc`、`g++`、`make` 等工具，是在 Linux 系统上编译软件所必需的基本工具集。
+
+3. **gdb-multiarch**： GNU 调试器（GDB）是用于调试程序的标准工具。`gdb-multiarch` 版本支持多种不同的体系结构，包括 RISC-V 架构。
+
+4. **qemu-system-misc**： QEMU 是一个开源的虚拟机监视器和模拟器，支持多种硬件和体系结构。`qemu-system-misc` 是 QEMU 的一部分，用于安装并运行不同体系结构的系统镜像。
+
+5. **gcc-riscv64-linux-gnu** 和 **binutils-riscv64-linux-gnu**： 这两个包提供了用于 RISC-V 64位架构的交叉编译工具链。`gcc` 是 GNU 编译器集合中的一个组件，用于编译 C/C++ 程序；而 `binutils` 则包含了汇编器、链接器等工具，用于汇编和链接程序。
+
+### 2. 卸载新版qemu
+
+然后卸载掉qemu的新版本安装旧版本:
+
+```bash
+sudo apt-get remove qemu-system-misc
+
+wget https://download.qemu.org/qemu-5.1.0.tar.xz
+
+tar xf qemu-5.1.0.tar.xz
+
+cd qemu-5.1.0
+
+./configure --disable-kvm --disable-werror --prefix=/usr/local --target-list="riscv64-softmmu"
+# make编译过程耗时，请耐心等待
+make 
+
+sudo make install
+```
+
+在执行 `./configure` 命令会遇到如下缺少包的错误
+
+```bash
+# 错误1：
+ERROR: glib-2.48 gthread-2.0 is required to compile QEMU
+# 错误2：
+E: Unable to locate package libgthread-2.0-dev
+E: Couldn't find any package by glob 'libgthread-2.0-dev'
+E: Couldn't find any package by regex 'libgthread-2.0-dev
+# 错误3：
+ERROR: pixman >= 0.21.8 not present.       Please install the pixman devel package.
+```
+
+可以按照缺包提示这样解决，解决完问题就可以继续执行编译安装
+
+```bash
+# 解决1：
+# 首先尝试更新软件包索引
+sudo apt-get update
+# 然后再次尝试安装依赖项
+sudo apt-get install libglib2.0-dev libgthread-2.0-dev
+# 解决2:
+sudo apt-get install libglib2.0-dev libglib2.0
+# 解决3：
+sudo apt-get install libpixman-1-dev
+```
+
+
+
+## 克隆xv6实验仓库
 
  **Attention**：MIT 6.S081 这门课程每个lab对应一个git分支，所以请不要擅自将***.git\***目录删除或更改origin指向的仓库地址
 
@@ -195,6 +266,50 @@ git pull github main
 这个命令会从名为 `github` 的远程仓库的 `main` 分支拉取最新的更改到你当前所在的分支中。如果远程仓库中有新的提交，`git pull` 会自动将其下载并尝试将其合并到你当前所在的分支。
 
 如果你想要从远程仓库拉取其他分支的更改，只需将 `main` 替换为你想要拉取的分支名称。
+
+## 构建并运行xv6
+
+执行下面命令：
+
+```bash
+# 进入xv6-labs-2020目录，首次是切换util分支上的
+cd xv6-labs-2020/
+# 执行编译
+make qemu
+# 编译成功后的结果
+xv6 kernel is booting
+
+hart 1 starting
+hart 2 starting
+init: starting sh
+```
+
+在提示符下输入 `ls`，你会看到类似如下的输出:
+
+```bash
+$ ls
+.              1 1 1024
+..             1 1 1024
+README         2 2 2059
+xargstest.sh   2 3 93
+cat            2 4 23896
+echo           2 5 22728
+forktest       2 6 13088
+grep           2 7 27256
+init           2 8 23832
+kill           2 9 22696
+ln             2 10 22656
+ls             2 11 26128
+mkdir          2 12 22800
+rm             2 13 22792
+sh             2 14 41664
+stressfs       2 15 23800
+usertests      2 16 147440
+grind          2 17 37912
+wc             2 18 25040
+zombie         2 19 22192
+console        3 20 0
+```
 
 ## 总结
 
