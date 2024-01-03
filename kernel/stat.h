@@ -2,7 +2,7 @@
 #define T_FILE    2   // File
 #define T_DEVICE  3   // Device
 
-struct stat {
+struct stat {  // 描述文件元数据的基本信息
   int dev;     // File system's disk device
   uint ino;    // Inode number
   short type;  // Type of file

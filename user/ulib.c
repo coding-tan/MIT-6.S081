@@ -33,7 +33,7 @@ strlen(const char *s)
 }
 
 void*
-memset(void *dst, int c, uint n)
+memset(void *dst, int c, uint n) //用于将指定的值（字节）填充到内存的一段连续空间中。
 {
   char *cdst = (char *) dst;
   int i;
@@ -96,7 +96,7 @@ atoi(const char *s)
 }
 
 void*
-memmove(void *vdst, const void *vsrc, int n)
+memmove(void *vdst, const void *vsrc, int n) // memmove函数将vsrc的长度为n的数据复制到vdst内存区域
 {
   char *dst;
   const char *src;
@@ -106,7 +106,7 @@ memmove(void *vdst, const void *vsrc, int n)
   if (src > dst) {
     while(n-- > 0)
       *dst++ = *src++;
-  } else {
+  } else {  // 从高地址开始复制，避免数据覆盖，巧妙的设计
     dst += n;
     src += n;
     while(n-- > 0)

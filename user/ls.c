@@ -4,17 +4,19 @@
 #include "kernel/fs.h"
 
 char*
-fmtname(char *path)
+fmtname(char *path) 
 {
   static char buf[DIRSIZ+1];
   char *p;
 
   // Find first character after last slash.
+  // 找到路径中最后一个斜杠后面的第一个字符。
   for(p=path+strlen(path); p >= path && *p != '/'; p--)
     ;
   p++;
 
   // Return blank-padded name.
+  // 返回空白填充的名称。
   if(strlen(p) >= DIRSIZ)
     return p;
   memmove(buf, p, strlen(p));
@@ -27,7 +29,7 @@ ls(char *path)
 {
   char buf[512], *p;
   int fd;
-  struct dirent de;
+  struct dirent de; 
   struct stat st;
 
   if((fd = open(path, 0)) < 0){
@@ -35,8 +37,8 @@ ls(char *path)
     return;
   }
 
-  if(fstat(fd, &st) < 0){
-    fprintf(2, "ls: cannot stat %s\n", path);
+  if(fstat(fd, &st) < 0){ // 获取文件的状态
+    fprintf(2, "ls: cannot stat %s\n", path); 
     close(fd);
     return;
   }
@@ -47,7 +49,7 @@ ls(char *path)
     break;
 
   case T_DIR:
-    if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){
+    if(strlen(path) + 1 + DIRSIZ + 1 > sizeof(buf)){
       printf("ls: path too long\n");
       break;
     }
