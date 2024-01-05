@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "sysinfo.h"
 
 uint64
 sys_exit(void)
@@ -94,4 +95,45 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+uint64 sys_trace(void)
+{
+  int n;
+  /*
+   * 当系统调用接口函数返回时，syscall将其返回值记录在p->trapframe->a0中。
+   * 因为RISC-V上的C调用约定将返回值放在a0中。系统调用通常返回负数表示错误，
+   * 返回零或正数表示成功。如果系统调用号无效，syscall打印错误并返回-1。
+  */
+  if(argint(0, &n) < 0) //判断a0寄存器的值是否非负
+    return -1;
+  struct proc *p = myproc(); //获取当前进程
+  char *mask = p->mask; //获取当前进程的mask
+  int i = 0;
+  while(i < 23 && n > 0){
+    if(n % 2){
+      mask[i++] = '1';
+    }
+    else{
+      mask[i++] = '0';
+    }
+    n >>= 1;
+  }
+  return 0;
+}
+
+uint64 sys_sysinfo(void)
+{
+  struct sysinfo info;
+  uint64 addr;
+  struct proc *p = myproc();
+
+  if(argaddr(0, &addr) < 0)
+    return -1;
+  info.freemem = freemem_size();
+  info.nproc = proc_num();
+
+  if(copyout(p->pagetable, addr, (char *)&info, sizeof(info)) < 0)
+    return -1;
+  return 0;
 }

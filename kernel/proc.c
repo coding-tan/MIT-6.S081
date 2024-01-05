@@ -275,6 +275,9 @@ fork(void)
   }
   np->sz = p->sz;
 
+  // child process copies the parent's trace mask
+  safestrcpy(np->mask, p->mask, sizeof(p->mask));
+
   np->parent = p;
 
   // copy saved user registers.
@@ -692,4 +695,17 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+int proc_num(void)
+{
+  struct proc *p;
+  uint64 num = 0;
+  for(p = proc; p < &proc[NPROC]; p++) { // 遍历所有进程
+    if(p->state != UNUSED) {
+      num++;
+    }
+  }
+
+  return num;
 }
